@@ -1,0 +1,20 @@
+#!/bin/bash
+sudo apt-get -y update
+sudo apt-get -y install apache2 apache2-utils
+sudo apt-get -y install php7.0 php7.0-mysql libapache2-mod-php7.0 php7.0-cli php7.0-cgi php7.0-gd php-mysql
+sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password Xols@0407'
+sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password Xols@0407'
+sudo apt-get -y install mysql-server
+mysql -u root -pXols@0407 -e "CREATE DATABASE worddb"
+mysql -u root -pXols@0407 -e "GRANT ALL PRIVILEGES ON worddb.* TO worduser@localhost IDENTIFIED BY 'Xolword_0704'"
+curl -O https://wordpress.org/latest.tar.gz
+tar -zxvf latest.tar.gz
+mv wordpress/wp-config-sample.php wordpress/wp-config.php
+sed -i "s/database_name_here/worddb/g" wordpress/wp-config.php
+sed -i "s/username_here/worduser/g" wordpress/wp-config.php
+sed -i "s/password_here/Xolword_0704/g" wordpress/wp-config.php
+mv wordpress/* /var/www/html/
+rm -rf wordpress
+mv /var/www/html/index.html /var/www/html/index.html.bk
+sudo systemctl enable apache2
+sudo systemctl restart apache2
